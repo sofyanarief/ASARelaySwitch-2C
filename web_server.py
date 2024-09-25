@@ -2,7 +2,6 @@ from config_manager import ConfigManager
 from time import sleep
 import machine
 import socket
-import binascii
 
 class WebServer:
     def __init__(self):

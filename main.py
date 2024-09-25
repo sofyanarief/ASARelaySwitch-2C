@@ -32,8 +32,6 @@ while True:
                 configManagerObj.resetConfig()
                 restartMachine()
             else:
-                # touchListenerObj = TouchListener()
-                # touchListenerObj.detectChange()
                 mqttListenerObj = MQTTListener()
                 mqttListenerObj.subscribeTopic()
         else:
