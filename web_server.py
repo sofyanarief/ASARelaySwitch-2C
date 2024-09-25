@@ -33,7 +33,7 @@ class WebServer:
                         print('System Is Restarted')
                         machine.reset()
                 except OSError as e:
-                    if e.errno == 104:  # ECONNRESET
+                    if e.errno == 104:
                         print('Connection reset by peer')
                     else:
                         print('OSError: ', e)
@@ -43,7 +43,6 @@ class WebServer:
                 print('Error accepting connection: ', e)
 
     def urlDecode(self, encodedUrl):
-        # print('encode: '+encodedUrl)
         result = ""
         i = 0
         while i < len(encodedUrl):
@@ -54,7 +53,6 @@ class WebServer:
             else:
                 result += encodedUrl[i]
                 i += 1
-        # print('resutl: '+result)
         return result
                     
     def handleRequest(self, strRequest):
@@ -63,7 +61,6 @@ class WebServer:
         reqUrl = ''
         arrReqUrl = []
         requestLines = strRequest.split('\n')
-        # print('requestLines: '+str(requestLines))
         
         if len(requestLines) > 0:
             method, reqUrl, _ = requestLines[0].split(' ')
@@ -72,8 +69,6 @@ class WebServer:
             method = 'GET'
             path = '/'
         
-        # print('requestUrl: '+ str(reqUrl))
-
         if '?' in reqUrl:
             arrReqUrl = reqUrl.split('?')
             path = arrReqUrl[0]
@@ -90,20 +85,16 @@ class WebServer:
                 paramData[key] = val
         else:
             path = reqUrl
-
-        # print('paramData: '+str(paramData))
         
         if path == '':
             return self.serveHomePage()
-        elif path == 'setting':
-            return self.serveSettingPage()
         elif path == 'savesetting':
             if len(paramData) > 0:
                 return self.serveSaveSettingPage(paramData)
             else:
-                return self.serveSettingPage()
+                return self.serveHomePage()
         else:
-            return self.serve404Page()
+            return self.serveHomePage()
     
     def readHtmlHeaderFile(self):
         htmlContent = ''
@@ -126,35 +117,7 @@ class WebServer:
     def serveHomePage(self):
         htmlContent = ''
         htmlContent += self.readHtmlHeaderFile()
-        htmlContent += '<div class="page-container">'
-        htmlContent += '<h1 class="display-4">Welcome To ASA Technology</h1>'
         htmlContent += '<p class="lead">Glad you have ASA RelaySwitch 2 Channel version</p>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '&nbsp;<br>'
-        htmlContent += '<a href="setting">'
-        htmlContent += '<button type="button" class="btn btn-primary btn-lg">Let\'s Start Your Journey</button>'
-        htmlContent += '</a>'
-        htmlContent += '</div>'
-        htmlContent += self.readHtmlFooterFile()
-        return htmlContent
-    
-    def serve404Page(self):
-        htmlContent = ''
-        htmlContent += self.readHtmlHeaderFile()
-        htmlContent += '<h1 class="display-4">404</h1>'
-        htmlContent += '<p class="lead">Sorry, page not found</p>'
-        htmlContent += self.readHtmlFooterFile()
-        return htmlContent
-    
-    def serveSettingPage(self):
-        htmlContent = ''
-        htmlContent += self.readHtmlHeaderFile()
-        htmlContent += '<div class="page-container">'
-        htmlContent += '<h1 class="display-4">ASA RelaySwitch 2 Channel Version</h1>'
         htmlContent += '<p class="lead">Please fill form below to start using this device.</p>'
         htmlContent += '<div class="content-box">'
         htmlContent += '<form action="savesetting" target="_self" method="get">'
@@ -183,42 +146,21 @@ class WebServer:
         htmlContent += '<button type="submit" class="btn-success btn-lg">Save</button>'
         htmlContent += '</form>'
         htmlContent += '</div>'
-        htmlContent += '</div>'
         htmlContent += self.readHtmlFooterFile()
         return htmlContent
     
     def serveSaveSettingPage(self,paramData):
         htmlContent = ''
         htmlContent += self.readHtmlHeaderFile()
-        htmlContent += '<div class="page-container">'
-        htmlContent += '<h1 class="display-4">ASA RelaySwitch 2 Channel Version</h1>'
         htmlContent += '<p class="lead">You have configure this device with this value:</p>'
         htmlContent += '<div class="content-box">'
-        htmlContent += '<form action="savesetting" target="_self" method="get">'
-        htmlContent += '<div class="form-group">'
-        htmlContent += '<label for="ssid">WiFi Name:</label>'
-        htmlContent += '<input class="form-control" type="text" name="ssid" value="'+paramData.get('ssid')+'" readonly>'
+        htmlContent += '<p><b>WiFi Name:</b><br>'+paramData.get('ssid')+'</p>'
+        htmlContent += '<p><b>WiFi Password:</b><br>'+paramData.get('passwd')+'</p>'
+        htmlContent += '<p><b>MQTT Server:</b><br>'+paramData.get('mqttServer')+'</p>'
+        htmlContent += '<p><b>Channel 1 Topic:</b><br>'+paramData.get('ch1Topic')+'</p>'
+        htmlContent += '<p><b>Channel 2 Topic:</b><br>'+paramData.get('ch2Topic')+'</p>'
         htmlContent += '</div>'
-        htmlContent += '<div class="form-group">'
-        htmlContent += '<label for="passwd">WiFi Password:</label>'
-        htmlContent += '<input class="form-control" type="text" name="passwd" value="'+paramData.get('passwd')+'" readonly>'
-        htmlContent += '</div>'
-        htmlContent += '<div class="form-group">'
-        htmlContent += '<label for="mqttServer">MQTT Server:</label>'
-        htmlContent += '<input class="form-control" type="text" name="mqttServer" value="'+paramData.get('mqttServer')+'" readonly>'
-        htmlContent += '</div>'
-        htmlContent += '<div class="form-group">'
-        htmlContent += '<label for="ch1Topic">Channel 1 Topic:</label>'
-        htmlContent += '<input class="form-control" type="text" name="ch1Topic" value="'+paramData.get('ch1Topic')+'" readonly>'
-        htmlContent += '</div>'
-        htmlContent += '<div class="form-group">'
-        htmlContent += '<label for="ch2Topic">Channel 2 Topic:</label>'
-        htmlContent += '<input class="form-control" type="text" name="ch2Topic" value="'+paramData.get('ch2Topic')+'" readonly>'
-        htmlContent += '</div>'
-        htmlContent += '</form>'
         htmlContent += '<p>Device will restart in 10 second for applying setting.</p>'
-        htmlContent += '</div>'
-        htmlContent += '</div>'
         htmlContent += self.readHtmlFooterFile()
         configManagerObj = ConfigManager()
         for key, value in paramData.items():

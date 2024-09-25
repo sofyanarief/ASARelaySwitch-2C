@@ -39,8 +39,6 @@ class MQTTListener:
         topicStr = topic.decode('utf-8')
         msgStr = msg.decode('utf-8')
         print(f"Message received on topic: {topicStr}, message: {msgStr}")
-
-        # Use RelayListener to set relay state
         self.relayListenerObj.setRelayState(topicStr, msgStr)
 
     def connectAndSubscribe(self):
@@ -62,7 +60,6 @@ class MQTTListener:
                 while numRetry <=3:
                     try:
                         print('Trying to subscribe '+val+' topic in MQTT Server for '+str(numRetry)+' time')
-                        # Subscribe to the topic
                         client.subscribe(val)
                     except:
                         print('Can\'t subscribe '+val+' topic in MQTT Server')

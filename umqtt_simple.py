@@ -1,6 +1,5 @@
 import usocket as socket
 import ustruct as struct
-from ubinascii import hexlify
 
 class MQTTException(Exception):
     pass
@@ -85,7 +84,6 @@ class MQTTClient:
 
         self.sock.write(premsg, i + 2)
         self.sock.write(msg)
-        #print(hex(len(msg)), hexlify(msg, ":"))
         self._send_str(self.client_id)
         if self.lw_topic:
             self._send_str(self.lw_topic)
@@ -119,7 +117,6 @@ class MQTTClient:
             sz >>= 7
             i += 1
         pkt[i] = sz
-        #print(hex(len(pkt)), hexlify(pkt, ":"))
         self.sock.write(pkt, i + 1)
         self._send_str(topic)
         if qos > 0:
@@ -146,7 +143,6 @@ class MQTTClient:
         pkt = bytearray(b"\x82\0\0\0")
         self.pid += 1
         struct.pack_into("!BH", pkt, 1, 2 + 2 + len(topic) + 1, self.pid)
-        #print(hex(len(pkt)), hexlify(pkt, ":"))
         self.sock.write(pkt)
         self._send_str(topic)
         self.sock.write(qos.to_bytes(1, "little"))
@@ -160,10 +156,6 @@ class MQTTClient:
                     raise MQTTException(resp[3])
                 return
 
-    # Wait for a single incoming MQTT message and process it.
-    # Subscribed messages are delivered to a callback previously
-    # set by .set_callback() method. Other (internal) MQTT
-    # messages processed internally.
     def wait_msg(self):
         res = self.sock.read(1)
         self.sock.setblocking(True)
@@ -171,7 +163,7 @@ class MQTTClient:
             return None
         if res == b"":
             raise OSError(-1)
-        if res == b"\xd0":  # PINGRESP
+        if res == b"\xd0":
             sz = self.sock.read(1)[0]
             assert sz == 0
             return None
@@ -196,9 +188,6 @@ class MQTTClient:
         elif op & 6 == 4:
             assert 0
 
-    # Checks whether a pending message from server is available.
-    # If not, returns immediately with None. Otherwise, does
-    # the same processing as wait_msg.
     def check_msg(self):
         self.sock.setblocking(False)
         return self.wait_msg()
