@@ -50,7 +50,7 @@ class MQTTListener:
 
         try:
             print('Connecting to MQTT Server')
-            client.connect()
+            client.connect(keepalive=60)
         except:
             print('Can\'t connect to MQTT Server')
         else:
@@ -76,8 +76,13 @@ class MQTTListener:
         try:
             client = self.connectAndSubscribe()
             while True:
-                client.check_msg()
-                sleep(1)
+                try:
+                    client.check_msg()
+                except Exception as e:
+                    print('Error checking messsage, maybe client disconnected')
+                    client = self.connectAndSubscribe()
+                else:
+                    sleep(1)
         except OSError as e:
             print('Failed to connect:', e)
 
